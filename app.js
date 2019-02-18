@@ -4,7 +4,6 @@ const { search, checkIsUp, proxies } = require('piratebay-search')
 function downloadTorrent(magnetLink) {
 	exec(`open ${magnetLink}`, (err, stdout, stderr) => {
 		if (err) console.log('Error:\n', stderr)
-		// console.log(stdout)
 	})
 }
 
@@ -17,12 +16,8 @@ function getInfo() {
 		return word.split(',')[0]
 	})
 
-	console.log(otherInfo)
-
 	return [ title, ...otherInfo ]
 }
-
-// let [ title, season, startEp, endEp ] = getInfo()
 
 const leadingZero = (n) => (String(n).length < 2 ? 0 + String(n) : n)
 
@@ -33,6 +28,7 @@ function downloadTorrents(magnetLinks) {
 
 function getEpisodes(info) {
 	let [ title, season, firstEp, lastEp ] = info
+	console.log('info', info)
 	new Promise((resolve) => {
 		searchEpisode(title, Number(season), Number(firstEp), Number(lastEp), resolve)
 	}).then((result) => {
