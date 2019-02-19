@@ -1,5 +1,6 @@
 const { exec } = require('child_process')
 const { search, checkIsUp, proxies } = require('piratebay-search')
+const prompts = require('prompts')
 
 function downloadTorrent(magnetLink) {
 	exec(`open ${magnetLink}`, (err, stdout, stderr) => {
@@ -7,16 +8,39 @@ function downloadTorrent(magnetLink) {
 	})
 }
 
-function getInfo() {
-	let input = process.argv.slice(2)
-	let lastTitleWordIndex = input.findIndex((arg) => arg.match(/,$/))
+async function getInfo() {
+	let questions = [
+		{
+			type: 'text',
+			name: 'title',
+			message: 'What is the name of the series?',
+			validate: (name) => (name.length < 2 ? 'You must provide the name of the series.' : true)
+		},
+		{
+			type: 'number',
+			name: 'season',
+			message: 'Which season?',
+			initial: 1,
+			min: 1
+		},
+		{
+			type: 'number',
+			name: 'firstEp',
+			message: 'What is the beginning of the range of episodes you want?',
+			initial: 1,
+			min: 1
+		},
+		{
+			type: 'number',
+			name: 'lastEp',
+			message: 'What is the end of the range of episodes you want?',
+			initial: 1,
+			min: 1
+		}
+	]
 
-	let title = input.slice(0, lastTitleWordIndex + 1).join(' ').split(',')[0]
-	let otherInfo = input.slice(lastTitleWordIndex + 1).map((word) => {
-		return word.split(',')[0]
-	})
-
-	return [ title, ...otherInfo ]
+	let response = await prompts(questions)
+	return response
 }
 
 const leadingZero = (n) => (String(n).length < 2 ? 0 + String(n) : n)
@@ -27,8 +51,7 @@ function downloadTorrents(magnetLinks) {
 }
 
 function getEpisodes(info) {
-	let [ title, season, firstEp, lastEp ] = info
-	console.log('info', info)
+	let { title, season, firstEp, lastEp } = info
 	new Promise((resolve) => {
 		searchEpisode(title, Number(season), Number(firstEp), Number(lastEp), resolve)
 	}).then((result) => {
@@ -52,8 +75,9 @@ function searchEpisode(title, season, episode, lastEpisode, resolve, magnetLinks
 
 			if (result) {
 				magnetLinks.push(result.file)
-				process.stdout.write(' Found!\n')
-			} else console.log(`No results for season ${season} episode ${episode} :(`)
+				if (result.seeds < 1) process.stdout.write(` Found, but no seeds :(\n`)
+				else process.stdout.write(` Found! Seeds: ${result.seeds}\n`)
+			} else process.stdout.write(` Couldn't find it :(\n`)
 
 			if (episode < lastEpisode) {
 				searchEpisode(title, season, episode + 1, lastEpisode, resolve, magnetLinks)
@@ -64,5 +88,15 @@ function searchEpisode(title, season, episode, lastEpisode, resolve, magnetLinks
 		.catch(console.error)
 }
 
-let info = getInfo()
-getEpisodes(info)
+function welcome() {
+	console.log('Welcome to Series Downloader!')
+}
+
+function startApp() {
+	welcome()
+	getInfo().then((info) => {
+		getEpisodes(info)
+	})
+}
+
+startApp()

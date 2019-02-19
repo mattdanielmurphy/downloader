@@ -5,6 +5,7 @@
 	"dependencies": {
 		"piratebay-search": "^1.0.1",
 		"progress": "^2.0.3",
+		"prompts": "^2.0.3",
 		"webtorrent-cli": "^1.12.3"
 	}
 }
