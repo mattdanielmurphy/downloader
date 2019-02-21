@@ -16,8 +16,22 @@ It's hard to remember all the arguments and in the correct order.
       2. Ending episode or last episode
 
 ## Working to-do list
-1. Split into questions
-2. Determine how many episodes there are in a particular season of a series
-3. Before searching at all check if up
-   1. if not up, try proxies
-4. 
+### TV & Movies
+- Before searching at all check if up
+   - if not up, try proxies
+- download via PC directly into designated Plex media folder
+
+### Movies
+- Make into movie downloader as well
+  - find movies with highest filesize but that have at least 2 seeders
+  - have option to change minimum seeders
+  - option to find best quality possible for immediate streaming
+
+
+- Option to list movies from IMDB top 200 that are in good quality and have certain amount of seeders
+
+### TV
+- Determine how many episodes there are in a particular season of a series
+  - add option to choose specific range of episodes or all episodes of season
+
+- find streaming links to episodes that aren't available via torrent

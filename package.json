@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"series": "node app.js"
+		"dl": "node app.js"
 	},
 	"dependencies": {
 		"piratebay-search": "^1.0.1",
