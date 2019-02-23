@@ -1,6 +1,6 @@
 const { search, checkIsUp, proxies } = require('piratebay-search')
 const prompts = require('prompts')
-const { downloadTorrent } = require('./DownloadTorrents')
+const { download } = require('./DownloadTorrents')
 
 class Movie {
 	constructor() {
@@ -39,7 +39,7 @@ class Movie {
 			else if (response === 'prev') this.prevPage()
 			else {
 				console.log('Opening magnet link...')
-				downloadTorrent(response)
+				download.torrent(response)
 			}
 		}
 		return await prompts(
@@ -90,22 +90,7 @@ class Movie {
 				this.pagesOfChoices.push(page)
 				page = []
 			}
-
-			// push choice if not at the end of a page
-			// if (i === 0 || i % pageLength !== 0) page.push(choice)
-			// else {
-			// 	page.push(choice)
-			// 	// if there's more pages, add a next page link
-			// 	if (i !== nResults - 1) page.push(nextPageLink)
-
-			// 	// push current page and clear it for the next page
-			// 	this.pagesOfChoices.push(page)
-			// 	page = []
-			// }
 		}
-		// console.log(this.pagesOfChoices)
-		// need pages of 20 results each for choices, otherwise won't work
-		// console.log('choices:', this.pagesOfChoices)
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	filterResults(results) {

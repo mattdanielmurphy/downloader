@@ -1,7 +1,11 @@
 {
-	"scripts": {
-		"dl": "node app.js"
-	},
+	"name": "downloader",
+	"version": "1.0.0",
+	"description": "downloads movies and TV shows from The Pirate Bay",
+	"main": "app.js",
+	"repository": "git@github.com:mattdanielmurphy/downloader",
+	"author": "Matt Murphy <matt@mattmurphy.ca>",
+	"license": "MIT",
 	"dependencies": {
 		"deluge": "^1.7.1",
 		"magnetorrent": "^0.0.2",
@@ -12,5 +16,8 @@
 		"prompts": "^2.0.3",
 		"qbittorrent-api": "^1.0.0",
 		"webtorrent-cli": "^1.12.3"
+	},
+	"scripts": {
+		"dl": "node app.js"
 	}
 }

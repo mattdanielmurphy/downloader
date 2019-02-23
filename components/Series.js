@@ -1,6 +1,6 @@
 const prompts = require('prompts')
 const { search, checkIsUp, proxies } = require('piratebay-search')
-const { downloadTorrents } = require('./DownloadTorrents')
+const { download } = require('./DownloadTorrents')
 
 class Series {
 	constructor() {
@@ -45,7 +45,7 @@ class Series {
 		new Promise((resolve) => {
 			this.searchEpisode(title, Number(season), Number(firstEp), Number(lastEp), resolve)
 		}).then((result) => {
-			downloadTorrents(result)
+			download.torrents(result)
 		})
 	}
 	searchEpisode(title, season, episode, lastEpisode, resolve, magnetLinks = []) {

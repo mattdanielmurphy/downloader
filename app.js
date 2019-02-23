@@ -2,10 +2,9 @@ const prompts = require('prompts')
 
 const { Series } = require('./components/Series')
 const { Movie } = require('./components/Movie')
-const { downloadTorrent } = require('./components/DownloadTorrents')
 
 async function welcome() {
-	console.log('Welcome to Series Downloader!')
+	console.log('Welcome to Downloader!')
 	const typeOfDownload = await prompts({
 		type: 'select',
 		name: 'typeOfDownload',
@@ -17,8 +16,7 @@ async function welcome() {
 }
 
 function startApp() {
-	// welcome().then(({ typeOfDownload }) => (typeOfDownload === 'movie' ? new Movie() : new Series()))
-	downloadTorrent()
+	welcome().then(({ typeOfDownload }) => (typeOfDownload === 'movie' ? new Movie() : new Series()))
 }
 
 startApp()
