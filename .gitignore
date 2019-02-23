@@ -1,6 +1,9 @@
 # macOS Files
 .DS_Store
 
+# SSH Info (includes password)
+ssh-info.js
+
 # Logs
 logs
 *.log

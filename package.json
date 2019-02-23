@@ -3,9 +3,14 @@
 		"dl": "node app.js"
 	},
 	"dependencies": {
+		"deluge": "^1.7.1",
+		"magnetorrent": "^0.0.2",
+		"node-ssh": "^5.1.2",
+		"parse-torrent": "^6.1.2",
 		"piratebay-search": "^1.0.1",
 		"progress": "^2.0.3",
 		"prompts": "^2.0.3",
+		"qbittorrent-api": "^1.0.0",
 		"webtorrent-cli": "^1.12.3"
 	}
 }

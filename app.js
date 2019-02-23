@@ -2,6 +2,7 @@ const prompts = require('prompts')
 
 const { Series } = require('./components/Series')
 const { Movie } = require('./components/Movie')
+const { downloadTorrent } = require('./components/DownloadTorrents')
 
 async function welcome() {
 	console.log('Welcome to Series Downloader!')
@@ -16,7 +17,8 @@ async function welcome() {
 }
 
 function startApp() {
-	welcome().then(({ typeOfDownload }) => (typeOfDownload === 'movie' ? new Movie() : new Series()))
+	// welcome().then(({ typeOfDownload }) => (typeOfDownload === 'movie' ? new Movie() : new Series()))
+	downloadTorrent()
 }
 
 startApp()
