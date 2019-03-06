@@ -4,7 +4,7 @@ const { download } = require('./DownloadTorrents')
 
 class Movie {
 	constructor() {
-		this.resultsPageLength = 11
+		this.resultsPageLength = 16
 		this.currentPage = 0
 
 		this.getInfo().then(() => this.searchTorrents())
@@ -16,21 +16,17 @@ class Movie {
 		throw error('Error: regEx in getFileSize() failed')
 	}
 	getFileSizeInGB({ description }) {
-		console.log(description)
 		let [ n, unit ] = this.getFileSize(description)
 
 		let size = Number(n)
-		console.log(n, unit)
 		if (unit === 'KiB') size *= 0.0000009765625
 		else if (unit === 'MiB') size *= 0.0009765625
 		else if (unit === 'GiB') size *= 0.9765625
 		else if (unit === 'TiB') size *= 976.5625
 
-		console.log(size)
 		return size
 	}
 	async showPageOfTorrents(choices) {
-		console.log('showing page of torrents', choices)
 		// move onSubmit out to this.onSubmit
 		let onSubmit = (prompt, response) => {
 			if (response === 'next') this.nextPage()
@@ -63,6 +59,7 @@ class Movie {
 		//
 		//
 		//
+		// console.log(this.pagesOfChoices[this.currentPage + 1])
 		this.currentPage++
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
@@ -102,9 +99,9 @@ class Movie {
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	filterResults(results) {
-		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
-		results = results.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
-		this.chooseTorrent(results)
+		return results
+			.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
+			.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
 	}
 	searchTorrents() {
 		let title = this.title
@@ -112,23 +109,24 @@ class Movie {
 		let results = []
 		let lastPageSearched = 0
 		new Promise((resolve) => {
-			function searchPage(n = 0) {
-				console.log(`Searching page ${n + 1}...`)
+			const searchPage = (pageN = 0) => {
+				console.log(`Searching page ${pageN + 1}...`)
 				console.log(title)
 				search(title, {
 					baseURL: 'https://thepiratebay.org',
-					page: n
+					page: pageN
 				}).then((res) => {
-					const lastResultHasMinSeeds = res[0].seeds >= minSeeders
+					const firstResultHasMinSeeds = res[0].seeds >= minSeeders
 					if (res.length > 1 && firstResultHasMinSeeds) {
 						results.push(...res)
-						this.filteredResults.push(this.filterResults(results))
 						// only continue if last item is at or above minSeeders
-						// console.log(filteredResults.length % pageLength)
+						// console.log('filtered results not this', this.filterResults(results))
+						this.filteredResults.push(...this.filterResults(results))
 						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
-						const notEnoughForFullPage =
-							this.resultsPageLength - this.filteredResults % this.resultsPageLength !== 0
-						if (lastResultHasMinSeeds && notEnoughForFullPage) searchPage(n + 1)
+						// const notEnoughForFullPage = this.resultsPageLength - this.filteredResults.length % this.resultsPageLength !== 0
+						const notEnoughForFullPage = this.filteredResults.length < this.resultsPageLength * pageN + 1
+
+						if (lastResultHasMinSeeds && notEnoughForFullPage) searchPage(pageN + 1)
 						else resolve()
 					} else resolve()
 				})
@@ -136,7 +134,7 @@ class Movie {
 			searchPage()
 		}).then(() => {
 			if (results.length === 0) console.log('No results :(')
-			else this.filterResults(results)
+			else this.chooseTorrent(this.filteredResults)
 		})
 	}
 	async askTitle() {
@@ -162,7 +160,7 @@ class Movie {
 			name: 'minFileSize',
 			message: 'Minimum file size: (in GB, default: 1)',
 			min: 0,
-			increment: 0.05,
+			increment: 0.1,
 			initial: 1
 		}).then(({ minFileSize }) => (this.minFileSize = minFileSize))
 	}
