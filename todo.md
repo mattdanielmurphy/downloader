@@ -22,10 +22,10 @@ It's hard to remember all the arguments and in the correct order.
 - download via PC directly into designated Plex media folder
 
 ### Movies
-- Make into movie downloader as well
-  - find movies with highest filesize but that have at least 2 seeders
-  - have option to change minimum seeders
-  - option to find best quality possible for immediate streaming
+- option to find best quality possible for immediate streaming
+
+- only search until you have 10 results
+  - while displaying results, search to get the next page of results if possible
 
 
 - Option to list movies from IMDB top 200 that are in good quality and have certain amount of seeders

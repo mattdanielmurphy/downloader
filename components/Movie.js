@@ -4,36 +4,34 @@ const { download } = require('./DownloadTorrents')
 
 class Movie {
 	constructor() {
-		this.getInfo().then(({ title }) => {
-			this.searchTorrents(title)
-		})
+		this.resultsPageLength = 11
 		this.currentPage = 0
-		this.minSeeders = 2
-		// minFileSize in MiB
-		this.minFileSize = 1024
+
+		this.getInfo().then(() => this.searchTorrents())
+		this.filteredResults = []
 	}
 	getFileSize(description) {
 		let regExpGroups = /Size (\d*\.*\d*)\s(\w*)/.exec(description)
 		if (regExpGroups) return regExpGroups.slice(1, 3)
 		throw error('Error: regEx in getFileSize() failed')
 	}
-	getFileSizeInMiB({ description }) {
+	getFileSizeInGB({ description }) {
+		console.log(description)
 		let [ n, unit ] = this.getFileSize(description)
 
 		let size = Number(n)
-		if (unit === 'GiB') size *= 1024
-		else if (unit === 'TiB') size *= 1048576
-		else if (unit === 'KiB') size = 1
+		console.log(n, unit)
+		if (unit === 'KiB') size *= 0.0000009765625
+		else if (unit === 'MiB') size *= 0.0009765625
+		else if (unit === 'GiB') size *= 0.9765625
+		else if (unit === 'TiB') size *= 976.5625
 
+		console.log(size)
 		return size
-	}
-	getNPages(nResults, pageLength) {
-		const remainder = pageLength - nResults % pageLength
-		const nPages = (nResults + remainder) / pageLength
-		return nPages
 	}
 	async showPageOfTorrents(choices) {
 		console.log('showing page of torrents', choices)
+		// move onSubmit out to this.onSubmit
 		let onSubmit = (prompt, response) => {
 			if (response === 'next') this.nextPage()
 			else if (response === 'prev') this.prevPage()
@@ -54,15 +52,25 @@ class Movie {
 		)
 	}
 	nextPage() {
+		//
+		//
+		//
+		//
+		// change next page link to always be there if more applicable results (lastResultHasMinSeeds)
+		// if no more filtered results, make nextpage link load more results
+		//
+		//
+		//
+		//
+		//
 		this.currentPage++
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	prevPage() {
-		this.currentPage++
+		this.currentPage--
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	async chooseTorrent(results) {
-		const pageLength = 6
 		const nResults = results.length
 		const nextPageLink = { title: '[ Next Page ]', value: 'next' }
 		const prevPageLink = { title: '[ Prev Page ]', value: 'prev' }
@@ -70,7 +78,7 @@ class Movie {
 		this.pagesOfChoices = []
 		let page = []
 		for (let i = 0; i < results.length; i++) {
-			const lastOfPage = i % pageLength === 0 && i > 0
+			const lastOfPage = i % this.resultsPageLength === 0 && i > 0
 			const lastOfChoices = i === nResults - 1
 			const r = results[i]
 			let choice = {
@@ -94,45 +102,75 @@ class Movie {
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	filterResults(results) {
-		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInMiB(r) >= this.minFileSize)
-		results = results.sort((a, b) => this.getFileSizeInMiB(b) - this.getFileSizeInMiB(a))
+		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
+		results = results.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
 		this.chooseTorrent(results)
 	}
-	searchTorrents(title) {
-		let results = []
+	searchTorrents() {
+		let title = this.title
 		let minSeeders = this.minSeeders
-		let promise = new Promise((resolve) => {
+		let results = []
+		let lastPageSearched = 0
+		new Promise((resolve) => {
 			function searchPage(n = 0) {
 				console.log(`Searching page ${n + 1}...`)
-				search(`${title}`, {
-					baseURL: 'https://pirateproxy.cam',
+				console.log(title)
+				search(title, {
+					baseURL: 'https://thepiratebay.org',
 					page: n
 				}).then((res) => {
-					if (res.length > 1 && res[0].seeds >= minSeeders) {
+					const lastResultHasMinSeeds = res[0].seeds >= minSeeders
+					if (res.length > 1 && firstResultHasMinSeeds) {
 						results.push(...res)
+						this.filteredResults.push(this.filterResults(results))
 						// only continue if last item is at or above minSeeders
-						if (res[res.length - 1].seeds >= minSeeders) searchPage(n + 1)
+						// console.log(filteredResults.length % pageLength)
+						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
+						const notEnoughForFullPage =
+							this.resultsPageLength - this.filteredResults % this.resultsPageLength !== 0
+						if (lastResultHasMinSeeds && notEnoughForFullPage) searchPage(n + 1)
 						else resolve()
 					} else resolve()
 				})
 			}
 			searchPage()
 		}).then(() => {
-			if (results.length === 0) {
-				console.log('No results :(')
-			} else {
-				this.filterResults(results)
-			}
+			if (results.length === 0) console.log('No results :(')
+			else this.filterResults(results)
 		})
 	}
-	async getInfo() {
-		// idea: for initial value pick a random movie from IMDB's top 200 movies
+	async askTitle() {
 		return await prompts({
 			type: 'text',
 			name: 'title',
 			message: 'What is the title of the movie?',
 			validate: (name) => (name.length < 2 ? 'You must provide the title of the movie.' : true)
-		})
+		}).then(({ title }) => (this.title = title))
+	}
+	async askMinSeeders() {
+		return await prompts({
+			type: 'number',
+			name: 'minSeeders',
+			message: 'Minimum seeders: (default: 2)',
+			min: 1,
+			initial: 2
+		}).then(({ minSeeders }) => (this.minSeeders = minSeeders))
+	}
+	async askMinFileSize() {
+		return await prompts({
+			type: 'number',
+			name: 'minFileSize',
+			message: 'Minimum file size: (in GB, default: 1)',
+			min: 0,
+			increment: 0.05,
+			initial: 1
+		}).then(({ minFileSize }) => (this.minFileSize = minFileSize))
+	}
+	async getInfo() {
+		// idea: for initial value pick a random movie from IMDB's top 200 movies
+		await this.askTitle()
+		await this.askMinSeeders()
+		await this.askMinFileSize()
 	}
 }
 
