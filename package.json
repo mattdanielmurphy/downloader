@@ -10,6 +10,9 @@
 		"piratebay-search": "^1.0.1",
 		"prompts": "^2.0.3"
 	},
+	"resolutions": {
+		"webtorrent-cli/chromecasts/castv2-client/castv2/protobufjs": "^5.0.3"
+	},
 	"bin": {
 		"watch-dl": "app.js"
 	},
