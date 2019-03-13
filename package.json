@@ -17,8 +17,8 @@
 		"qbittorrent-api": "^1.0.0",
 		"webtorrent-cli": "^1.12.3"
 	},
-	"resolutions": {
-		"webtorrent-cli/chromecasts/castv2-client/castv2/protobufjs": "^5.0.3"
+	"bin": {
+		"downloader": "app.js"
 	},
 	"scripts": {
 		"dl": "node app.js"
