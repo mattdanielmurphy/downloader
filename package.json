@@ -1,6 +1,6 @@
 {
-	"name": "watch-dl",
-	"version": "0.0.1",
+	"name": "pirateer",
+	"version": "1.0.0",
 	"description": "Downloads movies and TV shows from The Pirate Bay",
 	"main": "app.js",
 	"repository": "git@github.com:mattdanielmurphy/downloader",

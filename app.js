@@ -5,12 +5,12 @@ const { Series } = require('./components/Series')
 const { Movie } = require('./components/Movie')
 
 async function welcome() {
-	console.log('Welcome to Downloader!')
+	console.log('Welcome to Pirateer!')
 	const typeOfDownload = await prompts({
 		type: 'select',
 		name: 'typeOfDownload',
 		message: 'What would you like to download?',
-		choices: [ { title: 'Movie', value: 'movie' }, { title: 'TV Series', value: 'series' } ],
+		choices: [ { title: 'Single File', value: 'movie' }, { title: 'TV Series', value: 'series' } ],
 		initial: 0
 	})
 	return typeOfDownload
