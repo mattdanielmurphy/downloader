@@ -14,6 +14,4 @@ Pirateer is a command-line app for searching The Pirate Bay for movies and TV sh
 
     `npm install -g pirateer`
 
-2. Run `pirateer` to set sail.
-
-Use the arrow keys to navigate options and hit enter to confirm your selection.
+2. Run `pirateer`. Use the arrow keys to navigate options and hit enter to confirm your selection.
