@@ -1,3 +1,3 @@
 <p align="center">
-  <img alt="Pirateer Logo" width="500" height="500" src="https://user-images.githubusercontent.com/18738486/54312279-e62e5b80-45ac-11e9-9467-47aa61b82f23.png">
+  <img alt="Pirateer Logo" width="156" height="157" src="https://user-images.githubusercontent.com/18738486/54314474-26440d00-45b2-11e9-850b-37d86ff00820.png">
 </p>
