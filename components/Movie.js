@@ -49,17 +49,9 @@ class Movie {
 	}
 	nextPage() {
 		//
-		//
-		//
-		//
 		// change next page link to always be there if more applicable results (lastResultHasMinSeeds)
 		// if no more filtered results, make nextpage link load more results
 		//
-		//
-		//
-		//
-		//
-		// console.log(this.pagesOfChoices[this.currentPage + 1])
 		this.currentPage++
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
