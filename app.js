@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 const prompts = require('prompts')
 
 const { Series } = require('./components/Series')
