@@ -17,8 +17,14 @@ class Movie {
 		throw error('Error: regEx in getFileSize() failed')
 	}
 	getFileSizeInGB({ description }) {
-		if (!this) return 0
-		let [ n, unit ] = this.getFileSize(description)
+		// deeply saddened to have to repeat this code but I must due to this function
+		// being called from sort() in filterResults()... 'this' doesn't work here
+		function getFileSize(description) {
+			let regExpGroups = /Size (\d*\.*\d*)\s(\w*)/.exec(description)
+			if (regExpGroups) return regExpGroups.slice(1, 3)
+			throw error('Error: regEx in getFileSize() failed')
+		}
+		let [ n, unit ] = thisA.getFileSize(description)
 
 		let size = Number(n)
 		if (unit === 'KiB') size *= 0.0000009765625
@@ -102,6 +108,8 @@ class Movie {
 		if (this.sortBy === 'seeders') return results
 		else {
 			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
+			console.log(this.sortOrder, sortValue, sortValue(results[0]))
+			let thisA = this
 			let sortFunction =
 				this.sortOrder === 'ascending'
 					? (a, b) => sortValue(a) - sortValue(b)
@@ -118,7 +126,6 @@ class Movie {
 		new Promise((resolve) => {
 			const searchPage = (pageN = 0) => {
 				console.log(`Searching page ${pageN + 1}...`)
-				console.log(title)
 				search(title, {
 					baseURL: 'https://thepiratebay.org',
 					page: pageN
@@ -127,7 +134,6 @@ class Movie {
 					if (res.length > 1 && firstResultHasMinSeeds) {
 						results.push(...res)
 						// only continue if last item is at or above minSeeders
-						this.filteredResults.push(...this.filterResults(results))
 						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
 
 						if (lastResultHasMinSeeds) searchPage(pageN + 1)
@@ -138,7 +144,7 @@ class Movie {
 			searchPage()
 		}).then(() => {
 			if (results.length === 0) console.log('No results :(')
-			else this.chooseTorrent(this.filteredResults)
+			else this.chooseTorrent(this.filterResults(results))
 		})
 	}
 	async askTitle() {
