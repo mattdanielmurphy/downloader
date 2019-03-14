@@ -130,12 +130,10 @@ class Movie {
 					if (res.length > 1 && firstResultHasMinSeeds) {
 						results.push(...res)
 						// only continue if last item is at or above minSeeders
-						// console.log('filtered results not this', this.filterResults(results))
 						this.filteredResults.push(...this.filterResults(results))
 						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
-						const notEnoughForFullPage = this.filteredResults.length < this.resultsPageLength * pageN + 1
 
-						if (lastResultHasMinSeeds && notEnoughForFullPage) searchPage(pageN + 1)
+						if (lastResultHasMinSeeds) searchPage(pageN + 1)
 						else resolve()
 					} else resolve()
 				})
