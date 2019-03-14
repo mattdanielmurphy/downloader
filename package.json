@@ -1,9 +1,9 @@
 {
 	"name": "pirateer",
-	"version": "1.0.0",
-	"description": "Downloads movies and TV shows from The Pirate Bay",
+	"version": "1.0.3",
+	"description": "Finds movies and TV shows from The Pirate Bay",
 	"main": "app.js",
-	"repository": "git@github.com:mattdanielmurphy/downloader",
+	"repository": "git@github.com:mattdanielmurphy/pirateer",
 	"author": "Matt Murphy <matt@mattmurphy.ca>",
 	"license": "MIT",
 	"dependencies": {
@@ -14,9 +14,6 @@
 		"webtorrent-cli/chromecasts/castv2-client/castv2/protobufjs": "^5.0.3"
 	},
 	"bin": {
-		"watch-dl": "app.js"
-	},
-	"scripts": {
-		"dl": "node app.js"
+		"pirateer": "app.js"
 	}
 }
