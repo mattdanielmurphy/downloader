@@ -102,15 +102,12 @@ class Movie {
 		if (this.sortBy === 'seeders') return results
 		else {
 			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
-			// if (this.sortBy)
-			console.log(this)
 			let sortFunction =
 				this.sortOrder === 'ascending'
 					? (a, b) => sortValue(a) - sortValue(b)
 					: (a, b) => sortValue(b) - sortValue(a)
 
 			return results.sort(sortFunction)
-			// return results.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
 		}
 	}
 	searchTorrents() {
