@@ -41,11 +41,13 @@ class Series {
 
 		if (!this.title) questions.unshift(askTitle)
 
-		return await prompts(questions)
+		prompts(questions).then((response) => {
+			if (this.title) response.title = this.title
+			console.log(response)
+		})
 	}
 	getEpisodes(info) {
 		let { title, season, firstEp, lastEp } = info
-		if (!title) title = this.title
 		new Promise((resolve) => {
 			this.searchEpisode(title, Number(season), Number(firstEp), Number(lastEp), resolve)
 		}).then((result) => download.torrents(result))
@@ -56,6 +58,7 @@ class Series {
 		let searchQuery = `${title} s${leadingZero(season)}e${leadingZero(episode)}`
 
 		process.stdout.write(`Searching for episode ${episode}...`)
+		console.log(`\n ${title}`)
 		search(searchQuery, {
 			link: 'https://thehiddenbay.com'
 		})

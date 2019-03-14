@@ -3,13 +3,17 @@ const prompts = require('prompts')
 const { download } = require('./DownloadTorrents')
 
 class Movie {
-	constructor() {
+	constructor(title) {
 		this.resultsPageLength = 16
+		this.title = title
 		this.currentPage = 0
-
+		this.minSeeders = 2
+		this.minFileSize = 1
+		this.sortBy = 'fileSize'
 		this.sortOrder = 'descending'
-		this.getInfo().then(() => this.searchTorrents())
-		this.filteredResults = []
+
+		if (this.title) this.searchTorrents()
+		else this.getInfo().then(() => this.searchTorrents())
 	}
 	getFileSize(description) {
 		let regExpGroups = /Size (\d*\.*\d*)\s(\w*)/.exec(description)
