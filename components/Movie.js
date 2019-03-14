@@ -24,7 +24,8 @@ class Movie {
 			if (regExpGroups) return regExpGroups.slice(1, 3)
 			throw error('Error: regEx in getFileSize() failed')
 		}
-		let [ n, unit ] = thisA.getFileSize(description)
+
+		let [ n, unit ] = getFileSize(description)
 
 		let size = Number(n)
 		if (unit === 'KiB') size *= 0.0000009765625
@@ -34,10 +35,15 @@ class Movie {
 
 		return size
 	}
-	getUploadDate({ description }) {
+	getUploadDate(description) {
+		return description.match(/\d\d-\d\d\s\d\d\d\d/)
+	}
+	getUploadDateString({ description }) {
 		let regExpGroups = /(\d\d)-(\d\d)\s(\d\d\d\d)/.exec(description)
 		if (!regExpGroups) throw error('Error: regEx in getUploadDate() failed')
-		console.log(regExpGroups)
+		let [ month, day, year ] = regExpGroups.slice(1)
+		let date = new Date()
+		return date.setFullYear(year, month, day)
 	}
 	async showPageOfTorrents(choices) {
 		// move onSubmit out to this.onSubmit
@@ -84,7 +90,9 @@ class Movie {
 			const lastOfChoices = i === nResults - 1
 			const r = results[i]
 			let choice = {
-				title: `${this.getFileSize(r.description).join(' ')} | ${r.seeds}s | ${r.name}`,
+				title: `${this.getFileSize(r.description).join(' ')} | ${r.seeds}s | ${r.name} | ${this.getUploadDate(
+					r.description
+				)}`,
 				value: r.file
 			}
 			// add previous page link if top of page (but not the first page)
@@ -107,9 +115,7 @@ class Movie {
 		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
 		if (this.sortBy === 'seeders') return results
 		else {
-			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
-			console.log(this.sortOrder, sortValue, sortValue(results[0]))
-			let thisA = this
+			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDateString
 			let sortFunction =
 				this.sortOrder === 'ascending'
 					? (a, b) => sortValue(a) - sortValue(b)
