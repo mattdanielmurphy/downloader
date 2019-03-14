@@ -90,9 +90,10 @@ class Movie {
 			const lastOfChoices = i === nResults - 1
 			const r = results[i]
 			let choice = {
-				title: `${this.getFileSize(r.description).join(' ')} | ${r.seeds}s | ${r.name} | ${this.getUploadDate(
-					r.description
-				)}`,
+				title:
+					this.getFileSize(r.description).join(' ') +
+					` | ${r.seeds}s | ${r.name.trim()} | ` +
+					this.getUploadDate(r.description),
 				value: r.file
 			}
 			// add previous page link if top of page (but not the first page)
