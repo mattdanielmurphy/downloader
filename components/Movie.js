@@ -7,6 +7,7 @@ class Movie {
 		this.resultsPageLength = 16
 		this.currentPage = 0
 
+		this.sortOrder = 'descending'
 		this.getInfo().then(() => this.searchTorrents())
 		this.filteredResults = []
 	}
@@ -16,6 +17,7 @@ class Movie {
 		throw error('Error: regEx in getFileSize() failed')
 	}
 	getFileSizeInGB({ description }) {
+		if (!this) return 0
 		let [ n, unit ] = this.getFileSize(description)
 
 		let size = Number(n)
@@ -25,6 +27,11 @@ class Movie {
 		else if (unit === 'TiB') size *= 976.5625
 
 		return size
+	}
+	getUploadDate({ description }) {
+		let regExpGroups = /(\d\d)-(\d\d)\s(\d\d\d\d)/.exec(description)
+		if (!regExpGroups) throw error('Error: regEx in getUploadDate() failed')
+		console.log(regExpGroups)
 	}
 	async showPageOfTorrents(choices) {
 		// move onSubmit out to this.onSubmit
@@ -91,9 +98,20 @@ class Movie {
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	filterResults(results) {
-		return results
-			.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
-			.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
+		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
+		if (this.sortBy === 'seeders') return results
+		else {
+			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
+			// if (this.sortBy)
+			console.log(this)
+			let sortFunction =
+				this.sortOrder === 'ascending'
+					? (a, b) => sortValue(a) - sortValue(b)
+					: (a, b) => sortValue(b) - sortValue(a)
+
+			return results.sort(sortFunction)
+			// return results.sort((a, b) => this.getFileSizeInGB(b) - this.getFileSizeInGB(a))
+		}
 	}
 	searchTorrents() {
 		let title = this.title
@@ -115,7 +133,6 @@ class Movie {
 						// console.log('filtered results not this', this.filterResults(results))
 						this.filteredResults.push(...this.filterResults(results))
 						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
-						// const notEnoughForFullPage = this.resultsPageLength - this.filteredResults.length % this.resultsPageLength !== 0
 						const notEnoughForFullPage = this.filteredResults.length < this.resultsPageLength * pageN + 1
 
 						if (lastResultHasMinSeeds && notEnoughForFullPage) searchPage(pageN + 1)
@@ -156,11 +173,35 @@ class Movie {
 			initial: 1
 		}).then(({ minFileSize }) => (this.minFileSize = minFileSize))
 	}
+	async askSortBy() {
+		return await prompts({
+			type: 'select',
+			name: 'sortBy',
+			message: 'How shall I sort your results?',
+			choices: [
+				{ title: 'File Size', value: 'fileSize' },
+				{ title: 'Seeders', value: 'seeders' },
+				{ title: 'Date Uploaded', value: 'dateUploaded' }
+			],
+			initial: 0
+		}).then(({ sortBy }) => (this.sortBy = sortBy))
+	}
+	async askSortOrder() {
+		return await prompts({
+			type: 'select',
+			name: 'sortOrder',
+			message: '...in which order?',
+			choices: [ { title: 'Descending', value: 'descending' }, { title: 'Ascending', value: 'ascending' } ],
+			initial: 0
+		}).then(({ sortOrder }) => (this.sortOrder = sortOrder))
+	}
 	async getInfo() {
 		// idea: for initial value pick a random movie from IMDB's top 200 movies
 		await this.askTitle()
 		await this.askMinSeeders()
 		await this.askMinFileSize()
+		await this.askSortBy()
+		if (this.sortBy !== 'seeders') await this.askSortOrder()
 	}
 }
 
