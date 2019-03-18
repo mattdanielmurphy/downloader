@@ -11,7 +11,7 @@ class Download {
 	}
 	torrents(magnetLinks) {
 		console.log('\nOpening magnet links...\n' + '(you need a bittorrent client that supports magnet links)')
-		magnetLinks.forEach((link) => this.torrent(link))
+		setTimeout(() => magnetLinks.forEach((link) => this.torrent(link)), 500)
 	}
 }
 
