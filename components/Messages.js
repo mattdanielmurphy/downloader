@@ -9,7 +9,7 @@ class Message {
 	welcome() {
 		console.log(
 			logo +
-				'\nTip: Run "pirateer <title>" to search for a movie with default settings. See more with "pirateer help"\n'
+				'\nTip: Run "pirateer <title>" to search for a movie with default settings.\nSee more with "pirateer help"\n'
 		)
 	}
 	help() {
@@ -17,11 +17,16 @@ class Message {
 Usage:
     pirateer <options> <title>
     
-Example:
-    pirateer --series little house on the prairie
+Examples:
+    pirateer the big lebowski
+    pirateer -s little house on the prairie
 
 Options:
-		--series  download TV series
+      -t      download TV series
+      -s      sort by seeders (movies only)
+
+Commands:
+    help      display this help page
 	`)
 	}
 }

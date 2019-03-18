@@ -1,12 +1,12 @@
 const prompts = require('prompts')
 
 class PromptUser {
-	async askAll() {
+	async askAll(sortBySeeders) {
 		await this.askTitle()
 		await this.askMinSeeders()
 		await this.askMinFileSize()
-		await this.askSortBy()
-		if (this.sortBy !== 'seeders') await this.askSortOrder()
+		if (!sortBySeeders) await this.askSortBy()
+		if (this.sortBy !== 'seeders' && !sortBySeeders) await this.askSortOrder()
 		return { ...this }
 	}
 	async askTitle() {

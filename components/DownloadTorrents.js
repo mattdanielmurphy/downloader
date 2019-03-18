@@ -1,17 +1,17 @@
 const { exec } = require('child_process')
-const prompts = require('prompts')
 
 class Download {
 	constructor() {}
-	torrent(magnetLink) {
-		exec(`open "${magnetLink}"`, (err, stdout, stderr) => {
-			console.log(stdout)
-			if (err) console.log('Error:\n', stderr)
-		})
+	open(magnetLink) {
+		exec(`open "${magnetLink}"`, (err, stdout, stderr) => (err ? console.log('Error:\n', stderr) : null))
 	}
-	torrents(magnetLinks) {
-		console.log('\nOpening magnet links...\n' + '(you need a bittorrent client that supports magnet links)')
-		setTimeout(() => magnetLinks.forEach((link) => this.torrent(link)), 500)
+	single(magnetLink) {
+		console.log(`\nOpening magnet link...\n(requires a supporting bittorrent client)`)
+		setTimeout(() => this.open(magnetLink), 500)
+	}
+	series(magnetLinks) {
+		console.log(`\nOpening magnet links...\n(requires a supporting bittorrent client)`)
+		setTimeout(() => magnetLinks.forEach((link) => this.open(link)), 500)
 	}
 }
 

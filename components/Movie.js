@@ -4,21 +4,50 @@ const { download } = require('./DownloadTorrents')
 const { PromptUser } = require('./PromptUser')
 
 class Movie {
-	constructor(title) {
-		this.resultsPageLength = 16
+	constructor(title, sortBySeeders) {
 		this.title = title
-		this.currentPage = 0
 		this.minSeeders = 2
 		this.minFileSize = 1
-		this.sortBy = 'fileSize'
+		this.sortBy = sortBySeeders ? 'seeders' : 'fileSize'
 		this.sortOrder = 'descending'
+		this.resultsPageLength = 16
+
+		this.currentPage = 0
 
 		if (this.title) this.searchTorrents()
 		else
-			new PromptUser().askAll().then((response) => {
-				Object.assign(this, response)
+			new PromptUser().askAll(sortBySeeders).then((searchInfo) => {
+				Object.assign(this, searchInfo)
 				this.searchTorrents()
 			})
+	}
+	async searchTorrents() {
+		let title = this.title
+		let minSeeders = this.minSeeders
+		let results = []
+
+		await new Promise((resolve) => {
+			function searchPage(pageN = 0) {
+				console.log(`Searching page ${pageN + 1}...`)
+				search(title, {
+					baseURL: 'https://thepiratebay.org',
+					page: pageN
+				}).then((res) => {
+					const firstResultHasMinSeeds = res[0].seeds >= minSeeders
+					if (res.length > 1 && firstResultHasMinSeeds) {
+						results.push(...res)
+						// only continue if last item is at or above minSeeders
+						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
+
+						if (lastResultHasMinSeeds) searchPage(pageN + 1)
+						else resolve()
+					} else resolve()
+				})
+			}
+			searchPage()
+		})
+
+		results.length === 0 ? console.log('No results :(') : this.chooseTorrent(this.filterResults(results))
 	}
 	getFileSize(description) {
 		return /Size (\d*\.*\d*)\s(\w*)/.exec(description).slice(1, 3)
@@ -49,8 +78,7 @@ class Movie {
 			if (response === 'next') this.nextPage()
 			else if (response === 'prev') this.prevPage()
 			else {
-				console.log('Opening magnet link...')
-				download.torrent(response)
+				download.single(response)
 			}
 		}
 		return await prompts(
@@ -83,6 +111,7 @@ class Movie {
 			const lastOfPage = i % this.resultsPageLength === 0 && i > 0
 			const lastOfChoices = i === nResults - 1
 			const r = results[i]
+
 			let choice = {
 				title:
 					this.getFileSize(r.description).join(' ') +
@@ -90,6 +119,7 @@ class Movie {
 					this.getUploadDateString(r.description),
 				value: r.file
 			}
+
 			// add previous page link if top of page (but not the first page)
 			if (page.length === 0 && i !== 0) page.push(prevPageLink)
 
@@ -118,35 +148,6 @@ class Movie {
 
 			return results.sort(sortFunction)
 		}
-	}
-	searchTorrents() {
-		let title = this.title
-		let minSeeders = this.minSeeders
-		let results = []
-		let lastPageSearched = 0
-		new Promise((resolve) => {
-			const searchPage = (pageN = 0) => {
-				console.log(`Searching page ${pageN + 1}...`)
-				search(title, {
-					baseURL: 'https://thepiratebay.org',
-					page: pageN
-				}).then((res) => {
-					const firstResultHasMinSeeds = res[0].seeds >= minSeeders
-					if (res.length > 1 && firstResultHasMinSeeds) {
-						results.push(...res)
-						// only continue if last item is at or above minSeeders
-						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
-
-						if (lastResultHasMinSeeds) searchPage(pageN + 1)
-						else resolve()
-					} else resolve()
-				})
-			}
-			searchPage()
-		}).then(() => {
-			if (results.length === 0) console.log('No results :(')
-			else this.chooseTorrent(this.filterResults(results))
-		})
 	}
 }
 
