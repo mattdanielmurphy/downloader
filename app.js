@@ -29,7 +29,7 @@ function startApp() {
 	const args = process.argv.slice(2)
 	const noArgumentsGiven = args.length === 0
 	const firstArg = args[0]
-	const title = args.slice(1).join('')
+	const title = args.slice(1).join(' ')
 	const hasFlags = /^-/.test(firstArg)
 
 	if (noArgumentsGiven) {
