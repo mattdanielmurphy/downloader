@@ -1,6 +1,7 @@
 const { search, checkIsUp, proxies } = require('piratebay-search')
 const prompts = require('prompts')
 const { download } = require('./DownloadTorrents')
+const { PromptUser } = require('./PromptUser')
 
 class Movie {
 	constructor(title) {
@@ -13,23 +14,18 @@ class Movie {
 		this.sortOrder = 'descending'
 
 		if (this.title) this.searchTorrents()
-		else this.getInfo().then(() => this.searchTorrents())
+		else
+			new PromptUser().askAll().then((response) => {
+				Object.assign(this, response)
+				this.searchTorrents()
+			})
 	}
 	getFileSize(description) {
-		let regExpGroups = /Size (\d*\.*\d*)\s(\w*)/.exec(description)
-		if (regExpGroups) return regExpGroups.slice(1, 3)
-		throw error('Error: regEx in getFileSize() failed')
+		return /Size (\d*\.*\d*)\s(\w*)/.exec(description).slice(1, 3)
 	}
 	getFileSizeInGB({ description }) {
-		// deeply saddened to have to repeat this code but I must due to this function
-		// being called from sort() in filterResults()... 'this' doesn't work here
-		function getFileSize(description) {
-			let regExpGroups = /Size (\d*\.*\d*)\s(\w*)/.exec(description)
-			if (regExpGroups) return regExpGroups.slice(1, 3)
-			throw error('Error: regEx in getFileSize() failed')
-		}
-
-		let [ n, unit ] = getFileSize(description)
+		// must repeat code due to this function being called within sort() in filterResults() where 'this' doesn't work
+		let [ n, unit ] = /Size (\d*\.*\d*)\s(\w*)/.exec(description).slice(1, 3)
 
 		let size = Number(n)
 		if (unit === 'KiB') size *= 0.0000009765625
@@ -39,15 +35,13 @@ class Movie {
 
 		return size
 	}
-	getUploadDate(description) {
-		return description.match(/\d\d-\d\d\s\d\d\d\d/)
+	getUploadDateString(description) {
+		return description.match(/\d\d-\d\d\s\d{4}/)
 	}
-	getUploadDateString({ description }) {
-		let regExpGroups = /(\d\d)-(\d\d)\s(\d\d\d\d)/.exec(description)
-		if (!regExpGroups) throw error('Error: regEx in getUploadDate() failed')
-		let [ month, day, year ] = regExpGroups.slice(1)
-		let date = new Date()
-		return date.setFullYear(year, month, day)
+	getUploadDate({ description }) {
+		let [ month, day, year ] = /(\d\d)-(\d\d)\s(\d{4})/.exec(description).slice(1)
+		// let date =
+		return new Date().setFullYear(year, month, day)
 	}
 	async showPageOfTorrents(choices) {
 		// move onSubmit out to this.onSubmit
@@ -71,10 +65,6 @@ class Movie {
 		)
 	}
 	nextPage() {
-		//
-		// change next page link to always be there if more applicable results (lastResultHasMinSeeds)
-		// if no more filtered results, make nextpage link load more results
-		//
 		this.currentPage++
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
@@ -97,7 +87,7 @@ class Movie {
 				title:
 					this.getFileSize(r.description).join(' ') +
 					` | ${r.seeds}s | ${r.name.trim()} | ` +
-					this.getUploadDate(r.description),
+					this.getUploadDateString(r.description),
 				value: r.file
 			}
 			// add previous page link if top of page (but not the first page)
@@ -120,7 +110,7 @@ class Movie {
 		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
 		if (this.sortBy === 'seeders') return results
 		else {
-			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDateString
+			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
 			let sortFunction =
 				this.sortOrder === 'ascending'
 					? (a, b) => sortValue(a) - sortValue(b)
@@ -157,63 +147,6 @@ class Movie {
 			if (results.length === 0) console.log('No results :(')
 			else this.chooseTorrent(this.filterResults(results))
 		})
-	}
-	async askTitle() {
-		return await prompts({
-			type: 'text',
-			name: 'title',
-			message: 'What is the title of the movie?',
-			validate: (name) => (name.length < 2 ? 'You must provide the title of the movie.' : true)
-		}).then(({ title }) => (this.title = title))
-	}
-	async askMinSeeders() {
-		return await prompts({
-			type: 'number',
-			name: 'minSeeders',
-			message: 'Minimum seeders: (default: 2)',
-			min: 1,
-			initial: 2
-		}).then(({ minSeeders }) => (this.minSeeders = minSeeders))
-	}
-	async askMinFileSize() {
-		return await prompts({
-			type: 'number',
-			name: 'minFileSize',
-			message: 'Minimum file size: (in GB, default: 1)',
-			min: 0,
-			increment: 0.1,
-			initial: 1
-		}).then(({ minFileSize }) => (this.minFileSize = minFileSize))
-	}
-	async askSortBy() {
-		return await prompts({
-			type: 'select',
-			name: 'sortBy',
-			message: 'How shall I sort your results?',
-			choices: [
-				{ title: 'File Size', value: 'fileSize' },
-				{ title: 'Seeders', value: 'seeders' },
-				{ title: 'Date Uploaded', value: 'dateUploaded' }
-			],
-			initial: 0
-		}).then(({ sortBy }) => (this.sortBy = sortBy))
-	}
-	async askSortOrder() {
-		return await prompts({
-			type: 'select',
-			name: 'sortOrder',
-			message: '...in which order?',
-			choices: [ { title: 'Descending', value: 'descending' }, { title: 'Ascending', value: 'ascending' } ],
-			initial: 0
-		}).then(({ sortOrder }) => (this.sortOrder = sortOrder))
-	}
-	async getInfo() {
-		// idea: for initial value pick a random movie from IMDB's top 200 movies
-		await this.askTitle()
-		await this.askMinSeeders()
-		await this.askMinFileSize()
-		await this.askSortBy()
-		if (this.sortBy !== 'seeders') await this.askSortOrder()
 	}
 }
 
