@@ -18,11 +18,11 @@ Usage:
     pirateer <options> <title>
     
 Examples:
-    pirateer the big lebowski
-    pirateer -s little house on the prairie
+    - pirateer the big lebowski
+    - pirateer -t little house on the prairie
 
 Options:
-      -t      download TV series
+      -t      search for TV series
       -s      sort by seeders (movies only)
 
 Commands:
