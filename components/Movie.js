@@ -11,7 +11,7 @@ class Movie {
 		this.maxFileSize = 30
 		this.sortBy = sortBySeeders ? 'seeders' : 'fileSizeSeeders'
 		this.sortOrder = 'descending'
-		this.resultsPageLength = 16
+		this.resultsPageLength = 26
 
 		this.currentPage = 0
 
@@ -143,8 +143,8 @@ class Movie {
 			let choice = {
 				title:
 					this.getFileSizeString(r).join(' ') +
-					` | ${r.seeds}s | ${r.name.trim()} | ` +
-					this.getUploadDateString(r),
+					` | ${r.seeds}s | ${this.getUploadDateString(r)} | ` +
+					r.name.trim(),
 				value: r.file
 			}
 
