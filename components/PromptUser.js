@@ -42,9 +42,10 @@ class PromptUser {
 			name: 'sortBy',
 			message: 'How shall I sort your results?',
 			choices: [
+				{ title: 'File Size - Seeders', value: 'fileSizeSeeders' },
 				{ title: 'File Size', value: 'fileSize' },
 				{ title: 'Seeders', value: 'seeders' },
-				{ title: 'Date Uploaded', value: 'dateUploaded' }
+				{ title: 'Upload Date', value: 'uploadDate' }
 			],
 			initial: 0
 		}).then(({ sortBy }) => (this.sortBy = sortBy))

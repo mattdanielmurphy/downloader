@@ -8,7 +8,8 @@ class Movie {
 		this.title = title
 		this.minSeeders = 2
 		this.minFileSize = 1
-		this.sortBy = sortBySeeders ? 'seeders' : 'fileSize'
+		this.maxFileSize = 30
+		this.sortBy = sortBySeeders ? 'seeders' : 'fileSizeSeeders'
 		this.sortOrder = 'descending'
 		this.resultsPageLength = 16
 
@@ -49,7 +50,7 @@ class Movie {
 
 		results.length === 0 ? console.log('No results :(') : this.chooseTorrent(this.filterResults(results))
 	}
-	getFileSize(description) {
+	getFileSizeString({ description }) {
 		return /Size (\d*\.*\d*)\s(\w*)/.exec(description).slice(1, 3)
 	}
 	getFileSizeInGB({ description }) {
@@ -64,13 +65,40 @@ class Movie {
 
 		return size
 	}
-	getUploadDateString(description) {
+	getUploadDateString({ description }) {
 		return description.match(/\d\d-\d\d\s\d{4}/)
 	}
 	getUploadDate({ description }) {
 		let [ month, day, year ] = /(\d\d)-(\d\d)\s(\d{4})/.exec(description).slice(1)
 		// let date =
 		return new Date().setFullYear(year, month, day)
+	}
+	getFileSizeCategory({ description }) {
+		function getFileSizeInGB(description) {
+			let [ n, unit ] = /Size (\d*\.*\d*)\s(\w*)/.exec(description).slice(1, 3)
+			let size = Number(n)
+			if (unit === 'KiB') size *= 0.0000009765625
+			else if (unit === 'MiB') size *= 0.0009765625
+			else if (unit === 'GiB') size *= 0.9765625
+			else if (unit === 'TiB') size *= 976.5625
+			return size
+		}
+		function getCategory(fileSize) {
+			// 10-30 GB// 5-10 GB// 2-5 GB// 1-2 GB// 500+ MB// 200+ MB// 100+ MB// < 100 M
+			let categories = [ 0.1, 0.2, 0.5, 1, 2, 3, 5, 7, 10, 15 ]
+			let category
+			for (let i = 0; i < categories.length; i++) {
+				let currentCategory = categories[i]
+				if (fileSize < currentCategory) {
+					category = currentCategory
+					break
+				}
+			}
+			// if greater than last category, make new max category
+			return category || categories[categories.length - 1] + 1
+		}
+		let fileSize = getFileSizeInGB(description)
+		return getCategory(fileSize)
 	}
 	async showPageOfTorrents(choices) {
 		// move onSubmit out to this.onSubmit
@@ -114,9 +142,9 @@ class Movie {
 
 			let choice = {
 				title:
-					this.getFileSize(r.description).join(' ') +
+					this.getFileSizeString(r).join(' ') +
 					` | ${r.seeds}s | ${r.name.trim()} | ` +
-					this.getUploadDateString(r.description),
+					this.getUploadDateString(r),
 				value: r.file
 			}
 
@@ -137,11 +165,40 @@ class Movie {
 		this.showPageOfTorrents(this.pagesOfChoices[this.currentPage])
 	}
 	filterResults(results) {
-		results = results.filter((r) => r.seeds >= this.minSeeders && this.getFileSizeInGB(r) >= this.minFileSize)
+		results = results.filter(
+			(r) =>
+				r.seeds >= this.minSeeders &&
+				this.getFileSizeInGB(r) >= this.minFileSize &&
+				this.getFileSizeInGB(r) <= this.maxFileSize
+		)
 		if (this.sortBy === 'seeders') return results
-		else {
-			let sortValue = this.sortBy === 'fileSize' ? this.getFileSizeInGB : this.getUploadDate
-			let sortFunction =
+		else if (this.sortBy === 'fileSizeSeeders') {
+			const getFileSizeCategory = this.getFileSizeCategory
+			const getFileSize = this.getFileSizeInGB
+			let sortFunction
+			if (this.sortOrder === 'ascending') {
+				sortFunction = (a, b) => {
+					const aSizeCat = getFileSizeCategory(a)
+					const aSize = getFileSize(a)
+					const bSizeCat = getFileSizeCategory(b)
+					const bSize = getFileSize(b)
+					if (aSizeCat === bSizeCat && a.seeds === b.seeds) return aSize - bSize
+					else return aSizeCat - bSizeCat
+				}
+			} else {
+				sortFunction = (a, b) => {
+					const aSizeCat = getFileSizeCategory(a)
+					const aSize = getFileSize(a)
+					const bSizeCat = getFileSizeCategory(b)
+					const bSize = getFileSize(b)
+					if (aSizeCat === bSizeCat && a.seeds === b.seeds) return bSize - aSize
+					else return bSizeCat - aSizeCat
+				}
+			}
+			return results.sort(sortFunction)
+		} else {
+			let sortValue = (this.sortBy = 'fileSize' ? this.getFileSizeInGB : this.getUploadDate)
+			const sortFunction =
 				this.sortOrder === 'ascending'
 					? (a, b) => sortValue(a) - sortValue(b)
 					: (a, b) => sortValue(b) - sortValue(a)
