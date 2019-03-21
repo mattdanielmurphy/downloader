@@ -3,7 +3,7 @@ const { exec } = require('child_process')
 class Download {
 	constructor() {}
 	open(magnetLink) {
-		exec(`open "${magnetLink}"`, (err, stdout, stderr) => (err ? console.log('Error:\n', stderr) : null))
+		exec(`open "${magnetLink}"`, (err, stdout, stderr) => (err ? console.log('Error:\n', stderr) : process.exit(0)))
 	}
 	single(magnetLink) {
 		console.log(`\nOpening magnet link...\n(requires a supporting bittorrent client)`)
