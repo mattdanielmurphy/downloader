@@ -7,6 +7,7 @@ class Download {
 		exec(`open "${magnetLink}"`, (err, stdout, stderr) => (err ? console.log('Error:\n', stderr) : process.exit(0)))
 	}
 	single(magnetLink, clipboardMagnetLinks) {
+		console.log('open or copy')
 		if (clipboardMagnetLinks) {
 			clipboardy
 				.writeSync(magnetLink)

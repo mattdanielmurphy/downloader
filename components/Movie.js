@@ -20,7 +20,6 @@ class Movie {
 	}
 	getAndShowTorrents() {
 		this.getTorrents().then((results) => {
-			console.log(this.filters)
 			results.length === 0
 				? console.log('No results :(')
 				: this.createTorrentResultPages(new Filter(results, this.filters))
