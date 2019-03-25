@@ -5,9 +5,15 @@ const { result } = require('./Result')
 const { Filter } = require('./Filter')
 
 class Movie {
-	constructor(title, sortBySeeders) {
+	constructor(title, sortBySeeders, clipboardMagnetLinks) {
 		this.title = title
+		this.clipboardMagnetLinks = clipboardMagnetLinks
 		this.sortBy = sortBySeeders ? 'seeders' : 'fileSizeSeeders'
+		this.filters = {
+			minSeeders: 2,
+			minFileSize: 0.1,
+			maxFileSize: 30
+		}
 		this.sortOrder = 'descending'
 		this.resultsPageLength = 26
 		this.getAndShowTorrents()
@@ -88,7 +94,7 @@ class Movie {
 				page = []
 			}
 		}
-		new ShowTorrents(pagesOfChoices)
+		new ShowTorrents(pagesOfChoices, this.clipboardMagnetLinks)
 	}
 }
 

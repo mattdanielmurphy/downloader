@@ -18,11 +18,12 @@ async function welcome() {
 
 async function getFlags(flagsString) {
 	// check for bad flags
-	let badFlags = flagsString.match(/[^ts]+/g)
+	let badFlags = flagsString.match(/[^tscb]+/g)
 	if (badFlags) throw `Error: unknown flags ${badFlags.join(', ')}`
 	let tv = /t/.test(flagsString)
 	let sortBySeeders = /s/.test(flagsString)
-	return { tv, sortBySeeders }
+	let clipboardMagnetLinks = /cb/.test(flagsString)
+	return { tv, sortBySeeders, clipboardMagnetLinks }
 }
 
 function startApp() {
@@ -37,12 +38,12 @@ function startApp() {
 	} else if (firstArg === 'help') new Message().help()
 	else if (hasFlags) {
 		getFlags(firstArg.substr(1))
-			.then(({ tv, sortBySeeders }) => {
+			.then(({ tv, sortBySeeders, clipboardMagnetLinks }) => {
 				if (tv) {
 					if (title) new Series(title)
 					else new Series('')
-				} else if (sortBySeeders) {
-					if (title) new Movie(title, sortBySeeders)
+				} else if (sortBySeeders || clipboardMagnetLinks) {
+					if (title) new Movie(title, sortBySeeders, clipboardMagnetLinks)
 					else new Movie('', sortBySeeders)
 				}
 			})

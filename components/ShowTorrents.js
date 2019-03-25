@@ -2,8 +2,9 @@ const prompts = require('prompts')
 const { download } = require('./DownloadTorrents')
 
 class ShowTorrents {
-	constructor(pagesOfChoices) {
+	constructor(pagesOfChoices, clipboardMagnetLinks) {
 		this.pagesOfChoices = pagesOfChoices
+		this.clipboardMagnetLinks = clipboardMagnetLinks
 		this.currentPage = 0
 		this.initalPage()
 	}
@@ -23,7 +24,7 @@ class ShowTorrents {
 		const onSubmit = (prompt, response) => {
 			if (response === 'next') this.nextPage()
 			else if (response === 'prev') this.prevPage()
-			else download.single(response)
+			else download.single(response, clipboardMagnetLinks)
 		}
 		return await prompts(
 			{

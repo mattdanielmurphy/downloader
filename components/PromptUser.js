@@ -36,9 +36,9 @@ class PromptUser {
 		return await prompts({
 			type: 'number',
 			name: 'minFileSize',
-			message: 'Minimum file size: (in GB, default: 1)',
+			message: 'Minimum file size: (in GB, default: 0.1)',
 			min: 0,
-			increment: 0.1,
+			increment: 0.05,
 			initial: 1
 		}).then(({ minFileSize }) => (this.filters.minFileSize = minFileSize))
 	}

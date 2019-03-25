@@ -8,6 +8,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"args": "^5.0.1",
+		"clipboardy": "^1.2.3",
 		"piratebay-search": "^1.0.1",
 		"prompts": "^2.0.3"
 	},
