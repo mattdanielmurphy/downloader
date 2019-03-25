@@ -1,6 +1,6 @@
 {
 	"name": "pirateer",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"description": "Finds movies and TV shows from The Pirate Bay",
 	"main": "app.js",
 	"repository": "git@github.com:mattdanielmurphy/pirateer",

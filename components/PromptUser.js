@@ -1,12 +1,18 @@
 const prompts = require('prompts')
 
 class PromptUser {
-	async askAll(sortBySeeders) {
+	constructor() {
+		this.filters = {
+			maxFileSize: 30
+		}
+	}
+	async askAll(sortBy) {
 		await this.askTitle()
 		await this.askMinSeeders()
 		await this.askMinFileSize()
-		if (!sortBySeeders) await this.askSortBy()
-		if (this.sortBy !== 'seeders' && !sortBySeeders) await this.askSortOrder()
+		if (sortBy) this.sortBy = sortBy
+		else await this.askSortBy()
+		if (this.sortBy !== 'seeders') await this.askSortOrder()
 		return { ...this }
 	}
 	async askTitle() {
@@ -24,7 +30,7 @@ class PromptUser {
 			message: 'Minimum seeders: (default: 2)',
 			min: 1,
 			initial: 2
-		}).then(({ minSeeders }) => (this.minSeeders = minSeeders))
+		}).then(({ minSeeders }) => (this.filters.minSeeders = minSeeders))
 	}
 	async askMinFileSize() {
 		return await prompts({
@@ -34,7 +40,7 @@ class PromptUser {
 			min: 0,
 			increment: 0.1,
 			initial: 1
-		}).then(({ minFileSize }) => (this.minFileSize = minFileSize))
+		}).then(({ minFileSize }) => (this.filters.minFileSize = minFileSize))
 	}
 	async askSortBy() {
 		return await prompts({

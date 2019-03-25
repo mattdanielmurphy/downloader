@@ -7,11 +7,6 @@ const { Filter } = require('./Filter')
 class Movie {
 	constructor(title, sortBySeeders) {
 		this.title = title
-		this.filters = {
-			minSeeders: 2,
-			minFileSize: 1,
-			maxFileSize: 30
-		}
 		this.sortBy = sortBySeeders ? 'seeders' : 'fileSizeSeeders'
 		this.sortOrder = 'descending'
 		this.resultsPageLength = 26
@@ -19,18 +14,22 @@ class Movie {
 	}
 	getAndShowTorrents() {
 		this.getTorrents().then((results) => {
+			console.log(this.filters)
 			results.length === 0
 				? console.log('No results :(')
 				: this.createTorrentResultPages(new Filter(results, this.filters))
 		})
 	}
 	async getTorrents() {
-		return this.title
-			? this.searchTorrents()
-			: new PromptUser().askAll(sortBySeeders).then((searchInfo) => {
-					Object.assign(this, searchInfo)
-					this.searchTorrents()
-				})
+		if (this.title) {
+			return this.searchTorrents()
+		} else {
+			await new PromptUser().askAll(this.sortBy).then((searchInfo) => {
+				Object.assign(this, searchInfo)
+				console.log(this)
+			})
+			return this.searchTorrents()
+		}
 	}
 	async searchTorrents() {
 		let title = this.title
@@ -57,7 +56,6 @@ class Movie {
 			}
 			searchPage()
 		})
-
 		return results
 	}
 	async createTorrentResultPages(results) {
