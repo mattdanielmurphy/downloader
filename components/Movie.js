@@ -3,6 +3,7 @@ const { PromptUser } = require('./PromptUser')
 const { ShowTorrents } = require('./ShowTorrents')
 const { result } = require('./Result')
 const { Filter } = require('./Filter')
+const getTop250 = require('./GetTop250')
 
 class Movie {
 	constructor(title, sortBySeeders) {
