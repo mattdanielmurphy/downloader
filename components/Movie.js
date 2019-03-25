@@ -32,7 +32,6 @@ class Movie {
 		} else {
 			await new PromptUser().askAll(this.sortBy).then((searchInfo) => {
 				Object.assign(this, searchInfo)
-				console.log(this)
 			})
 			return this.searchTorrents()
 		}
