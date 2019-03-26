@@ -18,11 +18,11 @@ async function welcome() {
 
 async function getFlags(flagsString) {
 	// check for bad flags
-	let badFlags = flagsString.match(/[^tscb]+/g)
+	let badFlags = flagsString.match(/[^tsc]+/g)
 	if (badFlags) throw `Error: unknown flags ${badFlags.join(', ')}`
 	let tv = /t/.test(flagsString)
 	let sortBySeeders = /s/.test(flagsString)
-	let clipboardMagnetLinks = /cb/.test(flagsString)
+	let clipboardMagnetLinks = /c/.test(flagsString)
 	return { tv, sortBySeeders, clipboardMagnetLinks }
 }
 

@@ -24,6 +24,7 @@ Examples:
 Options:
       -t      search for TV series
       -s      sort by seeders (movies only)
+      -c      copy magnet link to clipboard rather than opening it (movies only)
 
 Commands:
     help      display this help page
