@@ -6,13 +6,10 @@ class Download {
 	open(magnetLink) {
 		exec(`open "${magnetLink}"`, (err, stdout, stderr) => (err ? console.log('Error:\n', stderr) : process.exit(0)))
 	}
-	single(magnetLink, clipboardMagnetLinks) {
-		console.log('open or copy')
+	async single(magnetLink, clipboardMagnetLinks) {
 		if (clipboardMagnetLinks) {
-			clipboardy
-				.writeSync(magnetLink)
-				.then(() => console.log('Magnet link copied to clipboard.'))
-				.catch((err) => console.log(err))
+			await clipboardy.writeSync(magnetLink)
+			console.log('Magnet link copied to clipboard.')
 		} else {
 			console.log(`\nOpening magnet link...\n(requires a supporting bittorrent client)`)
 			setTimeout(() => this.open(magnetLink), 500)

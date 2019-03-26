@@ -29,15 +29,35 @@ async function getFlags(flagsString) {
 function startApp() {
 	const args = process.argv.slice(2)
 	const noArgumentsGiven = args.length === 0
-	const firstArg = args[0]
-	const title = args.slice(1).join(' ')
-	const hasFlags = /^-/.test(firstArg)
+	let hasFlags = false
+	let title = args.slice(1).join(' ')
+	let flagsArgIndex
+	if (args)
+		args.forEach((arg, i) => {
+			if (/^-/.test(arg)) {
+				flagsArgIndex = i
+				hasFlags = true
+			}
+		})
+	if (flagsArgIndex !== 0) {
+		title = args.slice(0, flagsArgIndex).join(' ')
+		let titleAfterFlags = args[flagsArgIndex + 1]
+		if (titleAfterFlags) {
+			try {
+				throw 'Error: Please put flags before or after entire title'
+			} catch (err) {
+				console.log(err)
+			}
+			process.exit(1)
+		}
+	}
 
 	if (noArgumentsGiven) {
 		welcome().then(({ typeOfDownload }) => (typeOfDownload === 'movie' ? new Movie() : new Series()))
-	} else if (firstArg === 'help') new Message().help()
+	} else if (args[0] === 'help') new Message().help()
 	else if (hasFlags) {
-		getFlags(firstArg.substr(1))
+		let flags = flagsArgIndex ? args[flagsArgIndex].slice(1) : args[0].slice(1)
+		getFlags(flags)
 			.then(({ tv, sortBySeeders, clipboardMagnetLinks }) => {
 				if (tv) {
 					if (title) new Series(title)
@@ -47,9 +67,7 @@ function startApp() {
 					else new Movie('', sortBySeeders)
 				}
 			})
-			.catch((err) => {
-				console.log('err', err)
-			})
+			.catch((err) => console.log(err))
 
 		// let title = args.slice(1).join(' ')
 		// new Series(title)

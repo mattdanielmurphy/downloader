@@ -24,7 +24,7 @@ class ShowTorrents {
 		const onSubmit = (prompt, response) => {
 			if (response === 'next') this.nextPage()
 			else if (response === 'prev') this.prevPage()
-			else download.single(response, clipboardMagnetLinks)
+			else download.single(response, this.clipboardMagnetLinks)
 		}
 		return await prompts(
 			{
