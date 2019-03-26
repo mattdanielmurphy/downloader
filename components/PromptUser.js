@@ -11,8 +11,10 @@ class PromptUser {
 		await this.askMinSeeders()
 		await this.askMinFileSize()
 		if (sortBy) this.sortBy = sortBy
-		else await this.askSortBy()
-		if (this.sortBy !== 'seeders') await this.askSortOrder()
+		else {
+			await this.askSortBy()
+			await this.askSortOrder()
+		}
 		return { ...this }
 	}
 	async askTitle() {

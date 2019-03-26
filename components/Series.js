@@ -48,7 +48,9 @@ class Series {
 		if (!title) title = this.title
 		new Promise((resolve) => {
 			this.searchEpisode(title, Number(season), Number(firstEp), Number(lastEp), resolve)
-		}).then((result) => download.series(result))
+		}).then((result) => {
+			if (result.length > 0) download.series(result)
+		})
 	}
 	searchEpisode(title, season, episode, lastEpisode, resolve, magnetLinks = []) {
 		const leadingZero = (n) => (String(n).length < 2 ? 0 + String(n) : n)

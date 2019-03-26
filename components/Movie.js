@@ -8,7 +8,7 @@ class Movie {
 	constructor(title, sortBySeeders, clipboardMagnetLinks) {
 		this.title = title
 		this.clipboardMagnetLinks = clipboardMagnetLinks
-		this.sortBy = sortBySeeders ? 'seeders' : 'fileSizeSeeders'
+		this.sortBy = sortBySeeders ? 'seeders' : null
 		this.filters = {
 			minSeeders: 2,
 			minFileSize: 0.1,
@@ -47,8 +47,7 @@ class Movie {
 					baseURL: 'https://thepiratebay.org',
 					page: pageN
 				}).then((res) => {
-					const firstResultHasMinSeeds = res[0].seeds >= minSeeders
-					if (res.length > 1 && firstResultHasMinSeeds) {
+					if (res.length > 0 && res[0].seeds >= minSeeders) {
 						results.push(...res)
 						// only continue if last item is at or above minSeeders
 						const lastResultHasMinSeeds = res[res.length - 1].seeds >= minSeeders
